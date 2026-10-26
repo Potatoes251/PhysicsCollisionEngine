@@ -8,6 +8,8 @@ public abstract class BaseCollider : MonoBehaviour
     [HideInInspector]
     public AABB bounds => ToWorldBounds();
 
+    [SerializeField]
+    protected bool debug = true;
 
     private AABB ToWorldBounds()
     {
@@ -26,7 +28,7 @@ public abstract class BaseCollider : MonoBehaviour
         return new AABB { center = center, extents = extents };
     }
 
-    private void Awake()
+    protected virtual void Awake()
     {
         FitToRenderers();
     }

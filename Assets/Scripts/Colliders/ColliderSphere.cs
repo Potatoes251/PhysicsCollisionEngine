@@ -18,6 +18,8 @@ public class ColliderSphere : BaseCollider
 
     private void OnDrawGizmos()
     {
+        if (!debug) return;
+
         Gizmos.DrawWireSphere(center, radius);
     }
 }

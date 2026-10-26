@@ -223,7 +223,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0, y: 0, z: 0}
+  size: {x: 1, y: 1, z: 1}
 --- !u!1 &247095757
 GameObject:
   m_ObjectHideFlags: 0
@@ -327,7 +327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c8db3b69eb96af48ac4bce0e312ea0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderSphere
-  radius: 1
+  radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
 GameObject:
@@ -570,7 +570,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0, y: 0, z: 0}
+  size: {x: 1, y: 1, z: 1}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -758,8 +758,8 @@ GameObject:
   - component: {fileID: 1259053243}
   - component: {fileID: 1259053242}
   - component: {fileID: 1259053241}
-  - component: {fileID: 1259053240}
   - component: {fileID: 1259053244}
+  - component: {fileID: 1259053245}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -767,28 +767,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!64 &1259053240
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1259053239}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &1259053241
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -874,6 +852,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DynamicTree
   margin: 0.2
+--- !u!114 &1259053245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259053239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86598da738766f04496ed5ce4b0aba4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ColliderMesh
 --- !u!1 &1319185552
 GameObject:
   m_ObjectHideFlags: 0
@@ -977,7 +967,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c8db3b69eb96af48ac4bce0e312ea0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderSphere
-  radius: 1
+  radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
 --- !u!1 &1379939986
 GameObject:
@@ -1083,7 +1073,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0, y: 0, z: 0}
+  size: {x: 1, y: 1, z: 1}
 --- !u!1 &1421160213
 GameObject:
   m_ObjectHideFlags: 0
@@ -1188,7 +1178,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0, y: 0, z: 0}
+  size: {x: 1, y: 1, z: 1}
 --- !u!1 &1705059758
 GameObject:
   m_ObjectHideFlags: 0
@@ -1293,7 +1283,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0, y: 0, z: 0}
+  size: {x: 1, y: 1, z: 1}
 --- !u!1 &1721774025
 GameObject:
   m_ObjectHideFlags: 0
@@ -1398,7 +1388,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0, y: 0, z: 0}
+  size: {x: 1, y: 1, z: 1}
 --- !u!1 &1825753080
 GameObject:
   m_ObjectHideFlags: 0
@@ -1502,7 +1492,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c8db3b69eb96af48ac4bce0e312ea0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderSphere
-  radius: 1
+  radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
 --- !u!1 &1968696344
 GameObject:
@@ -1607,7 +1597,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c8db3b69eb96af48ac4bce0e312ea0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderSphere
-  radius: 1
+  radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

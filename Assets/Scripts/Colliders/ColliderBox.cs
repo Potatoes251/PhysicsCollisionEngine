@@ -24,6 +24,8 @@ public class ColliderBox : BaseCollider
 
     private void OnDrawGizmos()
     {
+        if (!debug) return;
+
         Gizmos.DrawWireCube(WorldCenter, WorldSize);
     }
 }

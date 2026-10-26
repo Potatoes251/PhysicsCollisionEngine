@@ -8,6 +8,9 @@ public class DynamicTree : MonoBehaviour
     [SerializeField]
     float margin = .2f;
 
+    [SerializeField]
+    bool debug = true;
+
     List<BaseCollider> colliders;
 
     List<(int x, int y)> pairs = new();
@@ -51,7 +54,8 @@ public class DynamicTree : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (!EditorApplication.isPlaying) return;
+        if (!EditorApplication.isPlaying || !debug) return;
+
         foreach (Node node in nodes)
         {
             Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
