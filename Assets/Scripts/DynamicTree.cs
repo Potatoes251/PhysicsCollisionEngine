@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
+using UnityEditor;
 using UnityEngine;
 
 public class DynamicTree : MonoBehaviour
@@ -9,6 +10,8 @@ public class DynamicTree : MonoBehaviour
     float margin = .2f;
 
     List<Collider> colliders;
+
+    List<(int x, int y)> pairs = new();
 
     List<Node> nodes = new();
     List<int> leafOf = new();
@@ -49,9 +52,17 @@ public class DynamicTree : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if (!EditorApplication.isPlaying) return;
         foreach (Node node in nodes)
         {
             Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
+        }
+
+        GetPairs();
+
+        foreach ((int x, int y) in pairs)
+        {
+            Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
         }
     }
 
@@ -225,6 +236,59 @@ public class DynamicTree : MonoBehaviour
             n.bounds = AddBounds(nodes[n.childL].bounds, nodes[n.childR].bounds);
             nodes[parent] = n;
             parent = nodes[parent].parent;
+        }
+    }
+
+    public List<(int x, int y)> GetPairs()
+    {
+        pairs.Clear();
+
+        PairsHelper(root);
+
+        return pairs;
+    }
+
+    private void PairsHelper(int n)
+    {
+        if (n == -1) return;
+
+        Node node = nodes[n];
+        if (node.IsLeaf()) return;
+
+        PairsHelper(node.childL);
+        PairsHelper(node.childR);
+        CrossChildren(node.childL, node.childR);
+    }
+
+    private void CrossChildren(int childL, int childR)
+    {
+        if (childL == -1 || childR == -1) return;
+
+        Node nodeL = nodes[childL];
+        Node nodeR = nodes[childR];
+
+        if (!Collide(nodeL.bounds, nodeR.bounds)) return;
+
+        if (nodeL.IsLeaf() && nodeR.IsLeaf())
+        {
+            pairs.Add((nodeL.colliderId, nodeR.colliderId));
+        }
+        else if (nodeL.IsLeaf())
+        {
+            CrossChildren(childL, nodeR.childL);
+            CrossChildren(childL, nodeR.childR);
+        }
+        else if (nodeR.IsLeaf())
+        {
+            CrossChildren(nodeL.childL, childR);
+            CrossChildren(nodeL.childR, childR);
+        }
+        else
+        {
+            CrossChildren(nodeL.childL, nodeR.childL);
+            CrossChildren(nodeL.childL, nodeR.childR);
+            CrossChildren(nodeL.childR, nodeR.childL);
+            CrossChildren(nodeL.childR, nodeR.childR);
         }
     }
 
