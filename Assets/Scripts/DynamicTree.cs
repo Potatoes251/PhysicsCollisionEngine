@@ -5,11 +5,10 @@ using UnityEngine;
 
 public class DynamicTree : MonoBehaviour
 {
-
     [SerializeField]
     float margin = .2f;
 
-    List<Collider> colliders;
+    List<BaseCollider> colliders;
 
     List<(int x, int y)> pairs = new();
 
@@ -18,12 +17,12 @@ public class DynamicTree : MonoBehaviour
     Stack<int> freeNodes = new();
     int root = -1;
 
-#region MonoBehaviour
+    #region MonoBehaviour
 
     // Collect all colliders and store them in the tree
     void Start()
     {
-        colliders = new(FindObjectsByType<Collider>(FindObjectsSortMode.None));
+        colliders = new(FindObjectsByType<BaseCollider>(FindObjectsSortMode.None));
 
         for (int i = 0; i < colliders.Count; i++)
         {
@@ -42,7 +41,7 @@ public class DynamicTree : MonoBehaviour
 
             Node n = nodes[leaf];
 
-            if (!Contains(n.bounds, colliders[i].bounds))
+            if (!n.bounds.Contains(colliders[i].bounds))
             {
                 RemoveLeaf(leaf);
                 leafOf[i] = InsertNode(colliders[i], i);
@@ -62,6 +61,14 @@ public class DynamicTree : MonoBehaviour
 
         foreach ((int x, int y) in pairs)
         {
+            if (GJK(colliders[x], colliders[y]))
+            {
+                Gizmos.color = Color.red;
+            }
+            else
+            {
+                Gizmos.color = Color.green;
+            }
             Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
         }
     }
@@ -70,52 +77,30 @@ public class DynamicTree : MonoBehaviour
 
 #region Bounds
 
-    Bounds AddBounds(Bounds bound1, Bounds bound2)
+    AABB AddBounds(AABB bound1, AABB bound2)
     {
         bound1.Encapsulate(bound2);
         return bound1;
     }
 
-    Bounds Fatten(Bounds bounds)
+    AABB Fatten(AABB bounds)
     {
         bounds.Expand(margin * 2);
         return bounds;
     }
 
-    private float Area(Bounds bounds)
-    {
-        Vector3 size = bounds.size;
-        return (size.x * size.y + size.y * size.z + size.z * size.x);
-    }
-
-    bool Contains(Bounds large, Bounds tight)
-    {
-        return large.Contains(tight.max) && large.Contains(tight.min);
-    }
-
-    bool Collide(Bounds b1, Bounds b2)
-    {
-        Vector3 min1 = b1.min;
-        Vector3 max1 = b1.max;
-        Vector3 min2 = b2.min;
-        Vector3 max2 = b2.max;
-
-        return !(min1.x > max2.x || min1.y > max2.y || min1.z > max2.z ||
-                min2.x > max1.x || min2.y > max1.y || min2.z > max1.z);
-    }
-
-#endregion
+    #endregion
 
 #region Node
     struct Node
     {
-        public Bounds bounds;
+        public AABB bounds;
         public int parent;
         public int childL;
         public int childR;
         public int colliderId;
 
-        public Node(Bounds bounds, int colliderId = -1, int parent = -1, int childL = -1, int childR = -1)
+        public Node(AABB bounds, int colliderId = -1, int parent = -1, int childL = -1, int childR = -1)
         {
             this.bounds = bounds;
             this.parent = parent;
@@ -129,19 +114,19 @@ public class DynamicTree : MonoBehaviour
 
     int Allocate(Node n)
     {
-        if (freeNodes.Count > 0) 
-        { 
-            int i = freeNodes.Pop(); 
-            nodes[i] = n; 
-            return i; 
+        if (freeNodes.Count > 0)
+        {
+            int i = freeNodes.Pop();
+            nodes[i] = n;
+            return i;
         }
         nodes.Add(n);
         return nodes.Count - 1;
     }
 
-    int InsertNode(Collider newCollider, int colliderId)
+    int InsertNode(BaseCollider newCollider, int colliderId)
     {
-        Bounds fattened = Fatten(newCollider.bounds);
+        AABB fattened = Fatten(newCollider.bounds);
         if (root == -1)
         {
             root = Allocate(new Node(fattened, colliderId));
@@ -152,8 +137,8 @@ public class DynamicTree : MonoBehaviour
         while (!nodes[sibling].IsLeaf())
         {
             Node n = nodes[sibling];
-            float costL = Area(AddBounds(nodes[n.childL].bounds, fattened)) - Area(nodes[n.childL].bounds);
-            float costR = Area(AddBounds(nodes[n.childR].bounds, fattened)) - Area(nodes[n.childR].bounds);
+            float costL = AddBounds(nodes[n.childL].bounds, fattened).Area() - nodes[n.childL].bounds.Area();
+            float costR = AddBounds(nodes[n.childR].bounds, fattened).Area() - nodes[n.childR].bounds.Area();
 
             sibling = costL > costR ? n.childR : n.childL;
         }
@@ -267,7 +252,7 @@ public class DynamicTree : MonoBehaviour
         Node nodeL = nodes[childL];
         Node nodeR = nodes[childR];
 
-        if (!Collide(nodeL.bounds, nodeR.bounds)) return;
+        if (!nodeL.bounds.Collide(nodeR.bounds)) return;
 
         if (nodeL.IsLeaf() && nodeR.IsLeaf())
         {
@@ -294,4 +279,166 @@ public class DynamicTree : MonoBehaviour
 
     #endregion
 
+
+
+#region GJK
+
+    List<Vector3> simplex = new List<Vector3>();
+
+    Vector3 Support(BaseCollider c1, BaseCollider c2, Vector3 dir)
+    {
+        return c1.Support(dir) - c2.Support(-dir);
+    }
+
+    static bool SameDirection(Vector3 a, Vector3 b) => Vector3.Dot(a, b) > 0f;
+
+    bool NextSimplex(ref List<Vector3> simplex, ref Vector3 dir)
+    {
+        return simplex.Count switch
+        {
+            2 => Line(ref dir),
+            3 => Triangle(ref dir),
+            4 => Tetrahedron(ref dir),
+            _ => false,
+        };
+    }
+
+    public bool GJK(BaseCollider c1, BaseCollider c2)
+    {
+        simplex.Clear();
+
+        Vector3 dir = Vector3.forward;
+
+        Vector3 p = Support(c1, c2, dir);
+        simplex.Add(p);
+
+        dir = -p;
+
+        while (true)
+        {
+            if (dir.sqrMagnitude < 1e-12f)
+                return true;
+
+            p = Support(c1, c2, dir);
+
+            if (Vector3.Dot(p, dir) <= 0f) 
+                return false;
+
+            simplex.Insert(0, p);
+
+            if (NextSimplex(ref simplex, ref dir))
+            {
+                return true;
+            }
+        }
+    }
+
+    bool Line(ref Vector3 dir)
+    {
+        Vector3 a = simplex[0];
+        Vector3 b = simplex[1];
+
+        Vector3 ab = b - a;
+        Vector3 ao = -a;
+
+        if (SameDirection(ab, ao))
+        {
+            dir = Vector3.Cross(Vector3.Cross(ab, ao), ab);
+        }
+        else
+        {
+            simplex = new List<Vector3> { a };
+            dir = ao;
+        }
+
+        return false;
+    }
+
+    bool Triangle(ref Vector3 dir)
+    {
+        Vector3 a = simplex[0];
+        Vector3 b = simplex[1];
+        Vector3 c = simplex[2];
+        
+        Vector3 ab = b - a;
+        Vector3 ac = c - a;
+        Vector3 ao = -a;
+        
+        Vector3 abc = Vector3.Cross(ab, ac);
+
+        if (SameDirection(Vector3.Cross(abc, ac), ao))
+        {
+            if (SameDirection(ac, ao))
+            {
+                simplex = new List<Vector3> { a, c };
+                dir = Vector3.Cross(Vector3.Cross(ac, ao), ac);
+            }
+            else
+            {
+                simplex = new List<Vector3> { a, b };
+                return Line(ref dir);
+            }
+        }
+        else
+        {
+            if (SameDirection(Vector3.Cross(ab, abc), ao))
+            {
+                simplex = new List<Vector3> { a, b };
+                return Line(ref dir);
+            }
+            else
+            {
+                if (SameDirection(abc, ao))
+                {
+                    dir = abc;
+                }
+                else
+                {
+                    simplex = new List<Vector3> { a, c, b };
+                    dir = -abc;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    bool Tetrahedron(ref Vector3 dir)
+    {
+        Vector3 a = simplex[0];
+        Vector3 b = simplex[1];
+        Vector3 c = simplex[2];
+        Vector3 d = simplex[3];
+        
+        Vector3 ab = b - a;
+        Vector3 ac = c - a;
+        Vector3 ad = d - a;
+        Vector3 ao = -a;
+        
+        Vector3 abc = Vector3.Cross(ab, ac);
+        Vector3 acd = Vector3.Cross(ac, ad);
+        Vector3 adb = Vector3.Cross(ad, ab);
+
+        if (SameDirection(abc, ao))
+        {
+            simplex = new List<Vector3> { a, b, c };
+            return Triangle(ref dir);
+        }
+
+        if (SameDirection(acd, ao))
+        {
+            simplex = new List<Vector3> { a, c, d };
+            return Triangle(ref dir);
+        }
+
+        if (SameDirection(adb, ao))
+        {
+            simplex = new List<Vector3> { a, d, b };
+            return Triangle(ref dir);
+        }
+
+        return true;
+    }
+
+#endregion
 }
