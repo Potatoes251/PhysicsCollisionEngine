@@ -1,11 +1,101 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
-using TreeEditor;
 using UnityEngine;
 
 public class DynamicTree : MonoBehaviour
 {
 
+    [SerializeField]
+    float margin = .2f;
+
+    List<Collider> colliders;
+
+    List<Node> nodes = new();
+    List<int> leafOf = new();
+    Stack<int> freeNodes = new();
+    int root = -1;
+
+#region MonoBehaviour
+
+    // Collect all colliders and store them in the tree
+    void Start()
+    {
+        colliders = new(FindObjectsByType<Collider>(FindObjectsSortMode.None));
+
+        for (int i = 0; i < colliders.Count; i++)
+        {
+            int leafIdx = InsertNode(colliders[i], i);
+            leafOf.Add(leafIdx);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        for (int i = 0; i < colliders.Count; i++)
+        {
+            int leaf = leafOf[i];
+
+            if (leaf < 0 || leaf >= nodes.Count) continue;
+
+            Node n = nodes[leaf];
+
+            if (!Contains(n.bounds, colliders[i].bounds))
+            {
+                RemoveLeaf(leaf);
+                leafOf[i] = InsertNode(colliders[i], i);
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        foreach (Node node in nodes)
+        {
+            Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
+        }
+    }
+
+#endregion
+
+#region Bounds
+
+    Bounds AddBounds(Bounds bound1, Bounds bound2)
+    {
+        bound1.Encapsulate(bound2);
+        return bound1;
+    }
+
+    Bounds Fatten(Bounds bounds)
+    {
+        bounds.Expand(margin * 2);
+        return bounds;
+    }
+
+    private float Area(Bounds bounds)
+    {
+        Vector3 size = bounds.size;
+        return (size.x * size.y + size.y * size.z + size.z * size.x);
+    }
+
+    bool Contains(Bounds large, Bounds tight)
+    {
+        return large.Contains(tight.max) && large.Contains(tight.min);
+    }
+
+    bool Collide(Bounds b1, Bounds b2)
+    {
+        Vector3 min1 = b1.min;
+        Vector3 max1 = b1.max;
+        Vector3 min2 = b2.min;
+        Vector3 max2 = b2.max;
+
+        return !(min1.x > max2.x || min1.y > max2.y || min1.z > max2.z ||
+                min2.x > max1.x || min2.y > max1.y || min2.z > max1.z);
+    }
+
+#endregion
+
+#region Node
     struct Node
     {
         public Bounds bounds;
@@ -26,91 +116,71 @@ public class DynamicTree : MonoBehaviour
         public readonly bool IsLeaf() { return childL == -1 && childR == -1; }
     }
 
-    Bounds AddBounds(Bounds bound1, Bounds bound2)
+    int Allocate(Node n)
     {
-        bound1.Encapsulate(bound2);
-        return bound1;
-    }
-
-    private float Area(Bounds bounds)
-    {
-        Vector3 size = bounds.size;
-        return (size.x * size.y + size.y * size.z + size.z * size.x);
-    }
-
-    [SerializeField]
-    float margin = .2f;
-
-    List<Collider> colliders;
-
-    List<Node> nodes = new();
-    Stack<int> freeNodes = new();
-    int root = -1;
-
-    // Collect all colliders and store them in the tree
-    void Start()
-    {
-        colliders = new(FindObjectsByType<Collider>(FindObjectsSortMode.None));
-
-        for (int i = 0; i < colliders.Count; i++)
-        {
-            InsertNode(colliders[i], i);
+        if (freeNodes.Count > 0) 
+        { 
+            int i = freeNodes.Pop(); 
+            nodes[i] = n; 
+            return i; 
         }
+        nodes.Add(n);
+        return nodes.Count - 1;
     }
 
-    Bounds Fatten(Bounds bounds)
-    {
-        bounds.Expand(margin);
-        return bounds;
-    }
-
-    void InsertNode(Collider newCollider, int colliderId)
+    int InsertNode(Collider newCollider, int colliderId)
     {
         Bounds fattened = Fatten(newCollider.bounds);
         if (root == -1)
         {
-            root = nodes.Count;
-            nodes.Add(new(fattened, colliderId));
-            return;
+            root = Allocate(new Node(fattened, colliderId));
+            return root;
         }
 
-        int parent = root;
-        while (!nodes[parent].IsLeaf())
+        int sibling = root;
+        while (!nodes[sibling].IsLeaf())
         {
-            Node n = nodes[parent];
+            Node n = nodes[sibling];
             float costL = Area(AddBounds(nodes[n.childL].bounds, fattened)) - Area(nodes[n.childL].bounds);
             float costR = Area(AddBounds(nodes[n.childR].bounds, fattened)) - Area(nodes[n.childR].bounds);
 
-            parent = costL > costR ? n.childR : n.childL;
+            sibling = costL > costR ? n.childR : n.childL;
         }
 
-        Bounds newBounds = AddBounds(nodes[parent].bounds, fattened);
+        int oldParent = nodes[sibling].parent;
 
-        Node sibling = nodes[parent];
-        int grandparent = sibling.parent;
+        int leaf = Allocate(new(fattened, colliderId));
+        int newParent = Allocate(new(AddBounds(nodes[sibling].bounds, fattened), -1, oldParent, sibling, leaf));
 
-        sibling.parent = nodes.Count;
-        nodes[parent] = sibling;
-        
-        if (grandparent == -1) root = nodes.Count;
+        // Wire up
+        Node leafNode = nodes[leaf];
+        leafNode.parent = newParent;
+        nodes[leaf] = leafNode;
+
+        Node siblingNode = nodes[sibling];
+        siblingNode.parent = newParent;
+        nodes[sibling] = siblingNode;
+
+        if (oldParent == -1)
+        {
+            root = newParent;
+        }
         else
         {
-            Node g = nodes[grandparent];
-            if (g.childL == parent) g.childL = nodes.Count;
-            else g.childR = nodes.Count;
-            nodes[grandparent] = g;
+            Node oldParentNode = nodes[oldParent];
+            if (oldParentNode.childL == sibling) oldParentNode.childL = newParent;
+            else oldParentNode.childR = newParent;
+            nodes[oldParent] = oldParentNode;
         }
-        Node newNode = new(fattened, colliderId, nodes.Count);
 
-        nodes.Add(new(newBounds, -1, grandparent, parent, nodes.Count + 1));  // new parent
+        UpdateParentBounds(nodes[sibling].parent);
 
-        nodes.Add(newNode); // new sibling
-
-        UpdateParentBounds(nodes[parent].parent);
+        return leaf;
     }
 
     private void RemoveLeaf(int leaf)
     {
+        freeNodes.Push(leaf);
         if (leaf == root)
         {
             root = -1;
@@ -118,6 +188,7 @@ public class DynamicTree : MonoBehaviour
         }
 
         int parent = nodes[leaf].parent;
+
         Node p = nodes[parent];
         int sibling = p.childL == leaf ? p.childR : p.childL;
         int grandParent = p.parent;
@@ -134,9 +205,9 @@ public class DynamicTree : MonoBehaviour
         {
             Node grandPa = nodes[grandParent];
 
-            if (grandPa.childL == parent) 
-                grandPa.childL = sibling; 
-            else 
+            if (grandPa.childL == parent)
+                grandPa.childL = sibling;
+            else
                 grandPa.childR = sibling;
 
             nodes[grandParent] = grandPa;
@@ -157,11 +228,6 @@ public class DynamicTree : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        foreach (Node node in nodes)
-        {
-            Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
-        }
-    }
+    #endregion
+
 }
