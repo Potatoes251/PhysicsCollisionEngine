@@ -11,28 +11,34 @@ public class PhysicsManager : MonoBehaviour
     [SerializeField]
     private Vector3 gravity = new(0f, -9.81f, 0f);
 
+    [SerializeField]
+    private bool enableGravity = true;
+    [SerializeField]
+    private bool enableDamping = true;
+
     private void ResolveCollision(RigidBody body1, RigidBody body2, HitInfo hitInfo)
     {
         float sumInvMass = (body1.invMass + body2.invMass);
 
         if (sumInvMass == 0f) return;
 
-        float bounciness = (body1.bounciness + body2.bounciness) * .5f;
         float dot = Vector3.Dot((body2.velocity - body1.velocity), hitInfo.normal);
 
         if (dot < 0f)
         {
-            Vector3 raxn = Vector3.Cross(hitInfo.hitPoint - body1.transform.position, hitInfo.normal);
-            Vector3 rbxn = Vector3.Cross(hitInfo.hitPoint - body2.transform.position, hitInfo.normal);
+            Vector3 r1xn = Vector3.Cross(hitInfo.hitPoint - body1.transform.position, hitInfo.normal);
+            Vector3 r2xn = Vector3.Cross(hitInfo.hitPoint - body2.transform.position, hitInfo.normal);
             float k = sumInvMass
-                    + Vector3.Dot(raxn, body1.ApplyInvInertia(raxn))
-                    + Vector3.Dot(rbxn, body2.ApplyInvInertia(rbxn));
+                    + Vector3.Dot(r1xn, body1.ApplyInvInertia(r1xn))
+                    + Vector3.Dot(r2xn, body2.ApplyInvInertia(r2xn));
             if (k == 0f) return;
             
+            float bounciness = (body1.bounciness + body2.bounciness) * .5f;
+                
             float impulse = -(1 + bounciness) * dot / k;
 
-            body1.AddImpulse(-impulse * body1.invMass * hitInfo.normal, hitInfo.hitPoint - body1.transform.position);
-            body2.AddImpulse(impulse * body2.invMass * hitInfo.normal, hitInfo.hitPoint - body2.transform.position);
+            body1.AddImpulse(-impulse * hitInfo.normal, hitInfo.hitPoint - body1.transform.position);
+            body2.AddImpulse(impulse * hitInfo.normal, hitInfo.hitPoint - body2.transform.position);
         }
 
         float correction = Mathf.Max(hitInfo.depth, 0f) / sumInvMass;
@@ -49,9 +55,11 @@ public class PhysicsManager : MonoBehaviour
 
             if (b == null || b.invMass == 0) continue;
 
-            b.AddForce(gravity * b.mass);
+            if (enableGravity)
+                b.AddForce(gravity * b.mass);
             b.ApplyForce(dt);
-            b.ApplyDamping();
+            if (enableDamping)
+                b.ApplyDamping();
 
             b.IntegrateTransform(dt);
         }

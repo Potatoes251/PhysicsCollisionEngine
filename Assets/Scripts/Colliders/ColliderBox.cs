@@ -6,9 +6,6 @@ public class ColliderBox : BaseCollider
     [SerializeField] Vector3 center = Vector3.zero; // local space
     [SerializeField] Vector3 size = Vector3.one;  // local space, before scale
 
-    public Vector3 WorldCenter => transform.TransformPoint(center);
-    public Vector3 WorldSize => Vector3.Scale(size, transform.lossyScale);
-
     public override Vector3 Support(Vector3 dir)
     {
         Vector3 localDir = transform.InverseTransformDirection(dir);
@@ -26,6 +23,7 @@ public class ColliderBox : BaseCollider
     {
         if (!debug) return;
 
-        Gizmos.DrawWireCube(WorldCenter, WorldSize);
+        Gizmos.matrix = transform.localToWorldMatrix;
+        Gizmos.DrawWireCube(center, size);
     }
 }

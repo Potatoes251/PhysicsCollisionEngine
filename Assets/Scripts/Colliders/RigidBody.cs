@@ -9,17 +9,17 @@ public class RigidBody : MonoBehaviour
     public Vector3 angularVelocity = new();
     private Vector3 torque = new();
 
-    public float mass;
+    public float mass = 1f;
 
     [HideInInspector]
     public float invMass;
     [Range(0f,1f)]
-    public float bounciness;
+    public float bounciness = .5f;
 
     [SerializeField]
-    private float linearDamping;
+    private float linearDamping = 2f;
     [SerializeField]
-    private float angularDamping;
+    private float angularDamping = .05f;
 
     public Vector3 localInertia = Vector3.one;
     private Vector3 invLocalInertia;
@@ -77,11 +77,11 @@ public class RigidBody : MonoBehaviour
         torque += Vector3.Cross(worldPoint - transform.position, force);
     }
 
-    public void AddImpulse(Vector3 force) { velocity += force; }
+    public void AddImpulse(Vector3 force) { velocity += force * invMass; }
 
     public void AddImpulse(Vector3 force, Vector3 r) // r = contact - center
     { 
-        velocity += force;
+        velocity += force * invMass;
         torque += ApplyInvInertia(Vector3.Cross(r, force));
     }
 
