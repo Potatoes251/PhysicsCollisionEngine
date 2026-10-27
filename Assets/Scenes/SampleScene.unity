@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 127039418}
   - component: {fileID: 127039417}
   - component: {fileID: 127039420}
+  - component: {fileID: 127039421}
   m_Layer: 0
   m_Name: Cube (1)
   m_TagString: Untagged
@@ -226,6 +227,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
+--- !u!114 &127039421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 127039415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1 &247095757
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,6 +256,7 @@ GameObject:
   - component: {fileID: 247095760}
   - component: {fileID: 247095759}
   - component: {fileID: 247095762}
+  - component: {fileID: 247095763}
   m_Layer: 0
   m_Name: Sphere (1)
   m_TagString: Untagged
@@ -333,6 +352,85 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
+--- !u!114 &247095763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 247095757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
+--- !u!1 &289298457
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 289298460}
+  - component: {fileID: 289298459}
+  - component: {fileID: 289298458}
+  m_Layer: 0
+  m_Name: Physics
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &289298458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 289298457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4932b1c6b450f4c92a0d1af382e82c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PhysicsManager
+  dynamicTree: {fileID: 289298459}
+  gravity: {x: 0, y: -9.81, z: 0}
+--- !u!114 &289298459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 289298457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12f62910ed002b641ba80d575420e11b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DynamicTree
+  margin: 0.2
+  debug: 1
+  colliders: []
+--- !u!4 &289298460
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 289298457}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -22.51754, y: 0, z: -17.91051}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -482,6 +580,7 @@ GameObject:
   - component: {fileID: 349099003}
   - component: {fileID: 349099002}
   - component: {fileID: 349099005}
+  - component: {fileID: 349099006}
   m_Layer: 0
   m_Name: Cube (4)
   m_TagString: Untagged
@@ -577,6 +676,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
+--- !u!114 &349099006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 349099000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -764,8 +880,8 @@ GameObject:
   - component: {fileID: 1259053243}
   - component: {fileID: 1259053242}
   - component: {fileID: 1259053241}
-  - component: {fileID: 1259053244}
   - component: {fileID: 1259053245}
+  - component: {fileID: 1259053246}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -845,21 +961,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1259053244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1259053239}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12f62910ed002b641ba80d575420e11b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DynamicTree
-  margin: 0.2
-  debug: 1
-  colliders: []
 --- !u!114 &1259053245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -874,6 +975,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ColliderMesh
   debug: 0
   attachedBody: {fileID: 0}
+--- !u!114 &1259053246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259053239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 0
+  invMass: 0
+  bounciness: 0
 --- !u!1 &1319185552
 GameObject:
   m_ObjectHideFlags: 0
@@ -886,6 +1004,7 @@ GameObject:
   - component: {fileID: 1319185555}
   - component: {fileID: 1319185554}
   - component: {fileID: 1319185557}
+  - component: {fileID: 1319185558}
   m_Layer: 0
   m_Name: Sphere (2)
   m_TagString: Untagged
@@ -981,6 +1100,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
+--- !u!114 &1319185558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1319185552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1 &1379939986
 GameObject:
   m_ObjectHideFlags: 0
@@ -993,6 +1129,7 @@ GameObject:
   - component: {fileID: 1379939989}
   - component: {fileID: 1379939988}
   - component: {fileID: 1379939991}
+  - component: {fileID: 1379939992}
   m_Layer: 0
   m_Name: Cube (5)
   m_TagString: Untagged
@@ -1088,6 +1225,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
+--- !u!114 &1379939992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1379939986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1 &1421160213
 GameObject:
   m_ObjectHideFlags: 0
@@ -1100,6 +1254,7 @@ GameObject:
   - component: {fileID: 1421160216}
   - component: {fileID: 1421160215}
   - component: {fileID: 1421160218}
+  - component: {fileID: 1421160219}
   m_Layer: 0
   m_Name: Cube (2)
   m_TagString: Untagged
@@ -1195,6 +1350,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
+--- !u!114 &1421160219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421160213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1 &1705059758
 GameObject:
   m_ObjectHideFlags: 0
@@ -1207,6 +1379,7 @@ GameObject:
   - component: {fileID: 1705059761}
   - component: {fileID: 1705059760}
   - component: {fileID: 1705059763}
+  - component: {fileID: 1705059764}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -1302,6 +1475,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
+--- !u!114 &1705059764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1705059758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1 &1721774025
 GameObject:
   m_ObjectHideFlags: 0
@@ -1314,6 +1504,7 @@ GameObject:
   - component: {fileID: 1721774028}
   - component: {fileID: 1721774027}
   - component: {fileID: 1721774030}
+  - component: {fileID: 1721774031}
   m_Layer: 0
   m_Name: Cube (3)
   m_TagString: Untagged
@@ -1409,6 +1600,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
+--- !u!114 &1721774031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1721774025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1 &1825753080
 GameObject:
   m_ObjectHideFlags: 0
@@ -1421,6 +1629,7 @@ GameObject:
   - component: {fileID: 1825753083}
   - component: {fileID: 1825753082}
   - component: {fileID: 1825753085}
+  - component: {fileID: 1825753086}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -1516,6 +1725,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
+--- !u!114 &1825753086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1825753080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1 &1968696344
 GameObject:
   m_ObjectHideFlags: 0
@@ -1528,6 +1754,7 @@ GameObject:
   - component: {fileID: 1968696347}
   - component: {fileID: 1968696346}
   - component: {fileID: 1968696349}
+  - component: {fileID: 1968696350}
   m_Layer: 0
   m_Name: Sphere (3)
   m_TagString: Untagged
@@ -1623,6 +1850,23 @@ MonoBehaviour:
   attachedBody: {fileID: 0}
   radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
+--- !u!114 &1968696350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968696344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d86bb50d4806843a6f22ea00e6ab98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RigidBody
+  velocity: {x: 0, y: 0, z: 0}
+  force: {x: 0, y: 0, z: 0}
+  mass: 1
+  invMass: 0
+  bounciness: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1641,3 +1885,4 @@ SceneRoots:
   - {fileID: 247095761}
   - {fileID: 1319185556}
   - {fileID: 1968696348}
+  - {fileID: 289298460}

@@ -10,6 +10,7 @@ public class DynamicTree : MonoBehaviour
     [SerializeField]
     bool debug = true;
 
+    [HideInInspector]
     public List<BaseCollider> colliders;
 
     List<(int x, int y)> pairs = new();
@@ -33,7 +34,7 @@ public class DynamicTree : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
+    public void UpdateTree()
     {
         for (int i = 0; i < colliders.Count; i++)
         {
@@ -62,19 +63,20 @@ public class DynamicTree : MonoBehaviour
 
         GetPairs();
 
-        foreach ((int x, int y) in pairs)
+        foreach ((int, int) pair in pairs)
         {
-            if (GJK(colliders[x], colliders[y]))
+            if (GJK(pair))
             {
                 Gizmos.color = Color.red;
-                HitInfo info = EPA(colliders[x], colliders[y]);
+                HitInfo info = EPA(pair);
                 Gizmos.DrawSphere(info.hitPoint, .1f);
                 Gizmos.DrawLine(info.hitPoint, info.hitPoint + info.normal * info.depth);
             }
             else
             {
                 Gizmos.color = Color.green;
-            Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
+                (int x, int y) = pair;
+                Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
             }
         }
     }
@@ -303,7 +305,7 @@ public class DynamicTree : MonoBehaviour
         public Vector3 b;     // point on collider 2
     }
 
-    SupportPoint Support(BaseCollider c1, BaseCollider c2, Vector3 dir)
+    static SupportPoint Support(BaseCollider c1, BaseCollider c2, Vector3 dir)
     {
         Vector3 a = c1.Support(dir);
         Vector3 b = c2.Support(-dir);
@@ -323,8 +325,11 @@ public class DynamicTree : MonoBehaviour
         };
     }
 
-    public bool GJK(BaseCollider c1, BaseCollider c2)
+    public bool GJK((int, int) pair)
     {
+        (int x, int y) = pair;
+        BaseCollider c1 = colliders[x];
+        BaseCollider c2 = colliders[y];
         simplex.Clear();
 
         Vector3 dir = Vector3.forward;
@@ -390,8 +395,12 @@ public class DynamicTree : MonoBehaviour
     }
 
     // needs to be called right after GJK
-    public HitInfo EPA(BaseCollider c1, BaseCollider c2)
+    public HitInfo EPA((int, int) pair)
     {
+        (int x, int y) = pair;
+        BaseCollider c1 = colliders[x];
+        BaseCollider c2 = colliders[y];
+
         List<SupportPoint> polytope = simplex;
         List<int> faces = new (){0, 1, 2,
                                 0, 3, 1,
