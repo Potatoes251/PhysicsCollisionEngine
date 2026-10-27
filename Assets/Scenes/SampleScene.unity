@@ -222,6 +222,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc10331e34ceedb4592e42068b98049e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
+  debug: 0
+  attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
 --- !u!1 &247095757
@@ -327,6 +329,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c8db3b69eb96af48ac4bce0e312ea0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderSphere
+  debug: 0
+  attachedBody: {fileID: 0}
   radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
@@ -569,6 +573,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc10331e34ceedb4592e42068b98049e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
+  debug: 0
+  attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
 --- !u!1 &410087039
@@ -852,6 +858,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DynamicTree
   margin: 0.2
+  debug: 1
+  colliders: []
 --- !u!114 &1259053245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -864,6 +872,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86598da738766f04496ed5ce4b0aba4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderMesh
+  debug: 0
+  attachedBody: {fileID: 0}
 --- !u!1 &1319185552
 GameObject:
   m_ObjectHideFlags: 0
@@ -949,7 +959,7 @@ Transform:
   m_GameObject: {fileID: 1319185552}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -16.55, y: 3.47, z: -22.22}
+  m_LocalPosition: {x: -17.129, y: 3.47, z: -22.22}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -967,6 +977,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c8db3b69eb96af48ac4bce0e312ea0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderSphere
+  debug: 0
+  attachedBody: {fileID: 0}
   radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
 --- !u!1 &1379939986
@@ -1072,6 +1084,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc10331e34ceedb4592e42068b98049e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
+  debug: 0
+  attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
 --- !u!1 &1421160213
@@ -1177,6 +1191,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc10331e34ceedb4592e42068b98049e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
+  debug: 0
+  attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
 --- !u!1 &1705059758
@@ -1282,6 +1298,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc10331e34ceedb4592e42068b98049e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
+  debug: 0
+  attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
 --- !u!1 &1721774025
@@ -1387,6 +1405,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc10331e34ceedb4592e42068b98049e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoxCollider
+  debug: 0
+  attachedBody: {fileID: 0}
   center: {x: 0, y: 0, z: 0}
   size: {x: 1, y: 1, z: 1}
 --- !u!1 &1825753080
@@ -1492,6 +1512,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c8db3b69eb96af48ac4bce0e312ea0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderSphere
+  debug: 0
+  attachedBody: {fileID: 0}
   radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
 --- !u!1 &1968696344
@@ -1597,6 +1619,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c8db3b69eb96af48ac4bce0e312ea0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ColliderSphere
+  debug: 0
+  attachedBody: {fileID: 0}
   radius: 0.5
   centerLocal: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807

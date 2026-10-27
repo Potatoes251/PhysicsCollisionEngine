@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,7 +10,7 @@ public class DynamicTree : MonoBehaviour
     [SerializeField]
     bool debug = true;
 
-    List<BaseCollider> colliders;
+    public List<BaseCollider> colliders;
 
     List<(int x, int y)> pairs = new();
 
@@ -20,7 +19,7 @@ public class DynamicTree : MonoBehaviour
     Stack<int> freeNodes = new();
     int root = -1;
 
-    #region MonoBehaviour
+#region MonoBehaviour
 
     // Collect all colliders and store them in the tree
     void Start()
@@ -68,12 +67,15 @@ public class DynamicTree : MonoBehaviour
             if (GJK(colliders[x], colliders[y]))
             {
                 Gizmos.color = Color.red;
+                HitInfo info = EPA(colliders[x], colliders[y]);
+                Gizmos.DrawSphere(info.hitPoint, .1f);
+                Gizmos.DrawLine(info.hitPoint, info.hitPoint + info.normal * info.depth);
             }
             else
             {
                 Gizmos.color = Color.green;
-            }
             Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
+            }
         }
     }
 
@@ -283,20 +285,34 @@ public class DynamicTree : MonoBehaviour
 
     #endregion
 
-
-
 #region GJK
 
-    List<Vector3> simplex = new List<Vector3>();
+    List<SupportPoint> simplex = new List<SupportPoint>();
 
-    Vector3 Support(BaseCollider c1, BaseCollider c2, Vector3 dir)
+    public struct HitInfo
     {
-        return c1.Support(dir) - c2.Support(-dir);
+        public Vector3 normal;
+        public Vector3 hitPoint;
+        public float depth;
+    }
+
+    public struct SupportPoint
+    {
+        public Vector3 point; // a - b (Minkowski difference)
+        public Vector3 a;     // point on collider 1
+        public Vector3 b;     // point on collider 2
+    }
+
+    SupportPoint Support(BaseCollider c1, BaseCollider c2, Vector3 dir)
+    {
+        Vector3 a = c1.Support(dir);
+        Vector3 b = c2.Support(-dir);
+        return new SupportPoint { a = a, b = b, point = a - b };
     }
 
     static bool SameDirection(Vector3 a, Vector3 b) => Vector3.Dot(a, b) > 0f;
 
-    bool NextSimplex(ref List<Vector3> simplex, ref Vector3 dir)
+    bool NextSimplex(ref List<SupportPoint> simplex, ref Vector3 dir)
     {
         return simplex.Count switch
         {
@@ -313,37 +329,201 @@ public class DynamicTree : MonoBehaviour
 
         Vector3 dir = Vector3.forward;
 
-        Vector3 p = Support(c1, c2, dir);
-        simplex.Add(p);
+        SupportPoint supportPoint = Support(c1, c2, dir);
+        Vector3 p = supportPoint.point;
+        simplex.Add(supportPoint);
 
         dir = -p;
 
-        while (true)
+        for (int i = 0; i < 64; i++)
         {
             if (dir.sqrMagnitude < 1e-12f)
                 return true;
 
-            p = Support(c1, c2, dir);
+            supportPoint = Support(c1, c2, dir);
+            p = supportPoint.point;
 
             if (Vector3.Dot(p, dir) <= 0f) 
                 return false;
 
-            simplex.Insert(0, p);
+            simplex.Insert(0, supportPoint);
 
             if (NextSimplex(ref simplex, ref dir))
             {
                 return true;
             }
         }
+        return false;
+    }
+
+    (List<(Vector3, float)>, int) GetFaceNormals(List<SupportPoint> polytope, List<int> faces)
+    {
+        List<(Vector3, float)> normals = new();
+        int minTriangle = 0;
+        float minDist = float.MaxValue;
+
+        for (int i = 0; i < faces.Count; i += 3)
+        {
+            SupportPoint a = polytope[faces[i]];
+            SupportPoint b = polytope[faces[i + 1]];
+            SupportPoint c = polytope[faces[i + 2]];
+
+            Vector3 normal = Vector3.Cross(b.point - a.point, c.point - a.point).normalized;
+            float distance = Vector3.Dot(normal, a.point);
+
+            if (distance < 0)
+            {
+                normal *= -1;
+                distance *= -1;
+            }
+            
+            normals.Add((normal, distance));
+
+            if (distance < minDist)
+            {
+                minDist = distance;
+                minTriangle = i / 3;
+            }
+        }
+
+        return (normals, minTriangle);
+    }
+
+    // needs to be called right after GJK
+    public HitInfo EPA(BaseCollider c1, BaseCollider c2)
+    {
+        List<SupportPoint> polytope = simplex;
+        List<int> faces = new (){0, 1, 2,
+                                0, 3, 1,
+                                0, 2, 3,
+                                1, 3, 2};
+
+        (List<(Vector3, float)> normals, int minTriangle) = GetFaceNormals(polytope, faces);
+
+        Vector3 minNormal = new();
+        float minDist = float.MaxValue;
+        SupportPoint support = new();
+
+        for (int i = 0; i < 64 && minDist == float.MaxValue; i++)
+        {
+            minNormal = normals[minTriangle].Item1;
+            minDist = normals[minTriangle].Item2;
+
+            support = Support(c1, c2, minNormal);
+
+            float distance = Vector3.Dot(support.point, minNormal);
+
+            if (Mathf.Abs(distance - minDist) > 0.001f)
+            {
+                minDist = float.MaxValue;
+
+                List<(int, int)> edges = new();
+
+                for (int j = 0; j < normals.Count; j++)
+                {
+                    int f = j * 3;
+
+                    Vector3 onFace = polytope[faces[f]].point;
+                    if (Vector3.Dot(normals[j].Item1, support.point - onFace) > 1e-6f)
+                    {
+                        AddIfUniqueEdge(ref edges, faces, f, f + 1);
+                        AddIfUniqueEdge(ref edges, faces, f + 1, f + 2);
+                        AddIfUniqueEdge(ref edges, faces, f + 2, f);
+
+                        faces[f + 2] = faces[^1]; 
+                        faces.RemoveAt(faces.Count - 1);
+                        faces[f + 1] = faces[^1]; 
+                        faces.RemoveAt(faces.Count - 1);
+                        faces[f] = faces[^1]; 
+                        faces.RemoveAt(faces.Count - 1);
+
+                        normals[j] = normals[^1]; // pop-erase
+                        normals.RemoveAt(normals.Count - 1);
+
+                        j--;
+                    }
+                }
+
+                List<int> newFaces = new();
+
+                foreach ((int idx1, int idx2) in edges)
+                {
+                    newFaces.Add(idx1);
+                    newFaces.Add(idx2);
+                    newFaces.Add(polytope.Count);
+                }
+                polytope.Add(support);
+
+                var (newNormals, newMinFace) = GetFaceNormals(polytope, newFaces);
+
+                float oldMinDistance = float.MaxValue;
+
+                for (int j = 0; j < normals.Count; j++)
+                {
+                    if (normals[j].Item2 < oldMinDistance)
+                    {
+                        oldMinDistance = normals[j].Item2;
+                        minTriangle = j;
+                    }
+                }
+
+                if (newNormals.Count != 0 && newNormals[newMinFace].Item2 < oldMinDistance)
+                {
+                    minTriangle = newMinFace + normals.Count;
+                }
+
+                faces.AddRange(newFaces);
+                normals.AddRange(newNormals);
+            }
+        }
+
+        int ff = minTriangle * 3;
+        SupportPoint A = polytope[faces[ff]];
+        SupportPoint B = polytope[faces[ff + 1]];
+        SupportPoint C = polytope[faces[ff + 2]];
+
+        Vector3 p = minNormal * minDist;
+        Vector3 bary = Barycentric(p, A.point, B.point, C.point);
+
+        Vector3 contactA = bary.x * A.a + bary.y * B.a + bary.z * C.a;
+        Vector3 contactB = bary.x * A.b + bary.y * B.b + bary.z * C.b;
+
+        return new() { normal = minNormal, depth = minDist, hitPoint = (contactA + contactB) * .5f };
+    }
+
+    static Vector3 Barycentric(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
+    {
+        Vector3 v0 = b - a, v1 = c - a, v2 = p - a;
+        float d00 = Vector3.Dot(v0, v0);
+        float d01 = Vector3.Dot(v0, v1);
+        float d11 = Vector3.Dot(v1, v1);
+        float d20 = Vector3.Dot(v2, v0);
+        float d21 = Vector3.Dot(v2, v1);
+        float denom = d00 * d11 - d01 * d01;
+
+        float v = (d11 * d20 - d01 * d21) / denom;
+        float w = (d00 * d21 - d01 * d20) / denom;
+        return new Vector3(1f - v - w, v, w);
+    }
+
+    void AddIfUniqueEdge(ref List<(int, int)> edges, List<int> faces, int a, int b)
+    {
+        (int, int) reverse = (faces[b], faces[a]);
+        int index = edges.IndexOf(reverse);
+
+        if (index >= 0)
+            edges.RemoveAt(index);
+        else
+            edges.Add((faces[a], faces[b]));
     }
 
     bool Line(ref Vector3 dir)
     {
-        Vector3 a = simplex[0];
-        Vector3 b = simplex[1];
+        SupportPoint a = simplex[0];
+        SupportPoint b = simplex[1];
 
-        Vector3 ab = b - a;
-        Vector3 ao = -a;
+        Vector3 ab = b.point - a.point;
+        Vector3 ao = -a.point;
 
         if (SameDirection(ab, ao))
         {
@@ -351,7 +531,7 @@ public class DynamicTree : MonoBehaviour
         }
         else
         {
-            simplex = new List<Vector3> { a };
+            simplex = new List<SupportPoint> { a };
             dir = ao;
         }
 
@@ -360,13 +540,13 @@ public class DynamicTree : MonoBehaviour
 
     bool Triangle(ref Vector3 dir)
     {
-        Vector3 a = simplex[0];
-        Vector3 b = simplex[1];
-        Vector3 c = simplex[2];
+        SupportPoint a = simplex[0];
+        SupportPoint b = simplex[1];
+        SupportPoint c = simplex[2];
         
-        Vector3 ab = b - a;
-        Vector3 ac = c - a;
-        Vector3 ao = -a;
+        Vector3 ab = b.point - a.point;
+        Vector3 ac = c.point - a.point;
+        Vector3 ao = -a.point;
         
         Vector3 abc = Vector3.Cross(ab, ac);
 
@@ -374,12 +554,12 @@ public class DynamicTree : MonoBehaviour
         {
             if (SameDirection(ac, ao))
             {
-                simplex = new List<Vector3> { a, c };
+                simplex = new List<SupportPoint> { a, c };
                 dir = Vector3.Cross(Vector3.Cross(ac, ao), ac);
             }
             else
             {
-                simplex = new List<Vector3> { a, b };
+                simplex = new List<SupportPoint> { a, b };
                 return Line(ref dir);
             }
         }
@@ -387,7 +567,7 @@ public class DynamicTree : MonoBehaviour
         {
             if (SameDirection(Vector3.Cross(ab, abc), ao))
             {
-                simplex = new List<Vector3> { a, b };
+                simplex = new List<SupportPoint> { a, b };
                 return Line(ref dir);
             }
             else
@@ -398,7 +578,7 @@ public class DynamicTree : MonoBehaviour
                 }
                 else
                 {
-                    simplex = new List<Vector3> { a, c, b };
+                    simplex = new List<SupportPoint> { a, c, b };
                     dir = -abc;
                 }
             }
@@ -409,15 +589,15 @@ public class DynamicTree : MonoBehaviour
 
     bool Tetrahedron(ref Vector3 dir)
     {
-        Vector3 a = simplex[0];
-        Vector3 b = simplex[1];
-        Vector3 c = simplex[2];
-        Vector3 d = simplex[3];
+        SupportPoint a = simplex[0];
+        SupportPoint b = simplex[1];
+        SupportPoint c = simplex[2];
+        SupportPoint d = simplex[3];
         
-        Vector3 ab = b - a;
-        Vector3 ac = c - a;
-        Vector3 ad = d - a;
-        Vector3 ao = -a;
+        Vector3 ab = b.point - a.point;
+        Vector3 ac = c.point - a.point;
+        Vector3 ad = d.point - a.point;
+        Vector3 ao = -a.point;
         
         Vector3 abc = Vector3.Cross(ab, ac);
         Vector3 acd = Vector3.Cross(ac, ad);
@@ -425,19 +605,19 @@ public class DynamicTree : MonoBehaviour
 
         if (SameDirection(abc, ao))
         {
-            simplex = new List<Vector3> { a, b, c };
+            simplex = new List<SupportPoint> { a, b, c };
             return Triangle(ref dir);
         }
 
         if (SameDirection(acd, ao))
         {
-            simplex = new List<Vector3> { a, c, d };
+            simplex = new List<SupportPoint> { a, c, d };
             return Triangle(ref dir);
         }
 
         if (SameDirection(adb, ao))
         {
-            simplex = new List<Vector3> { a, d, b };
+            simplex = new List<SupportPoint> { a, d, b };
             return Triangle(ref dir);
         }
 

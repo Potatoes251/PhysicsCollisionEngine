@@ -11,6 +11,9 @@ public abstract class BaseCollider : MonoBehaviour
     [SerializeField]
     protected bool debug = true;
 
+    [HideInInspector]
+    public RigidBody attachedBody = null;
+
     private AABB ToWorldBounds()
     {
         float4x4 localToWorld = transform.localToWorldMatrix;
@@ -31,6 +34,13 @@ public abstract class BaseCollider : MonoBehaviour
     protected virtual void Awake()
     {
         FitToRenderers();
+
+        RigidBody body = GetComponent<RigidBody>();
+
+        if (body != null)
+        {
+            attachedBody = body;
+        }
     }
 
     public abstract Vector3 Support(Vector3 dir);
