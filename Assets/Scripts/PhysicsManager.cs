@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using static DynamicTree;
+using static UnityEngine.PlayerLoop.PreUpdate;
 
 public class PhysicsManager : MonoBehaviour
 {
@@ -21,10 +22,17 @@ public class PhysicsManager : MonoBehaviour
 
         if (dot < 0f)
         {
-            float impulse = -(1 + bounciness) * dot / sumInvMass;
+            Vector3 raxn = Vector3.Cross(hitInfo.hitPoint - body1.transform.position, hitInfo.normal);
+            Vector3 rbxn = Vector3.Cross(hitInfo.hitPoint - body2.transform.position, hitInfo.normal);
+            float k = sumInvMass
+                    + Vector3.Dot(raxn, body1.ApplyInvInertia(raxn))
+                    + Vector3.Dot(rbxn, body2.ApplyInvInertia(rbxn));
+            if (k == 0f) return;
+            
+            float impulse = -(1 + bounciness) * dot / k;
 
-            body1.AddImpulse(-impulse * body1.invMass * hitInfo.normal);
-            body2.AddImpulse(impulse * body2.invMass * hitInfo.normal);
+            body1.AddImpulse(-impulse * body1.invMass * hitInfo.normal, hitInfo.hitPoint - body1.transform.position);
+            body2.AddImpulse(impulse * body2.invMass * hitInfo.normal, hitInfo.hitPoint - body2.transform.position);
         }
 
         float correction = Mathf.Max(hitInfo.depth, 0f) / sumInvMass;
@@ -38,19 +46,14 @@ public class PhysicsManager : MonoBehaviour
         foreach (BaseCollider collider in dynamicTree.colliders)
         {
             RigidBody b = collider.attachedBody;
+
             if (b == null || b.invMass == 0) continue;
 
             b.AddForce(gravity * b.mass);
-        }
-
-        foreach (BaseCollider collider in dynamicTree.colliders)
-        {
-            RigidBody b = collider.attachedBody;
-
-            if (b == null || b.invMass == 0) continue;
-
             b.ApplyForce(dt);
-            b.transform.position += b.velocity * dt;
+            b.ApplyDamping();
+
+            b.IntegrateTransform(dt);
         }
 
         dynamicTree.UpdateTree();

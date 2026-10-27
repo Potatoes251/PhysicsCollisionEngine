@@ -46,7 +46,7 @@ public class ColliderMesh : BaseCollider
 
         foreach (Mesh mesh in meshes)
         {
-            Gizmos.DrawMesh(mesh, transform.position, transform.rotation, transform.lossyScale);
+            Gizmos.DrawWireMesh(mesh, transform.position, transform.rotation, transform.lossyScale);
         }
     }
 }

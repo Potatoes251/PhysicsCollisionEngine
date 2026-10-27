@@ -15,11 +15,6 @@ public class DynamicTree : MonoBehaviour
 
     List<(int x, int y)> pairs = new();
 
-    List<Node> nodes = new();
-    List<int> leafOf = new();
-    Stack<int> freeNodes = new();
-    int root = -1;
-
 #region MonoBehaviour
 
     // Collect all colliders and store them in the tree
@@ -31,24 +26,6 @@ public class DynamicTree : MonoBehaviour
         {
             int leafIdx = InsertNode(colliders[i], i);
             leafOf.Add(leafIdx);
-        }
-    }
-
-    public void UpdateTree()
-    {
-        for (int i = 0; i < colliders.Count; i++)
-        {
-            int leaf = leafOf[i];
-
-            if (leaf < 0 || leaf >= nodes.Count) continue;
-
-            Node n = nodes[leaf];
-
-            if (!n.bounds.Contains(colliders[i].bounds))
-            {
-                RemoveLeaf(leaf);
-                leafOf[i] = InsertNode(colliders[i], i);
-            }
         }
     }
 
@@ -97,7 +74,9 @@ public class DynamicTree : MonoBehaviour
         return bounds;
     }
 
-    #endregion
+#endregion
+
+// Broad phase
 
 #region Node
     struct Node
@@ -118,6 +97,29 @@ public class DynamicTree : MonoBehaviour
         }
 
         public readonly bool IsLeaf() { return childL == -1 && childR == -1; }
+    }
+
+    List<Node> nodes = new();
+    List<int> leafOf = new();
+    Stack<int> freeNodes = new();
+    int root = -1;
+
+    public void UpdateTree()
+    {
+        for (int i = 0; i < colliders.Count; i++)
+        {
+            int leaf = leafOf[i];
+
+            if (leaf < 0 || leaf >= nodes.Count) continue;
+
+            Node n = nodes[leaf];
+
+            if (!n.bounds.Contains(colliders[i].bounds))
+            {
+                RemoveLeaf(leaf);
+                leafOf[i] = InsertNode(colliders[i], i);
+            }
+        }
     }
 
     int Allocate(Node n)
@@ -285,7 +287,9 @@ public class DynamicTree : MonoBehaviour
         }
     }
 
-    #endregion
+#endregion
+
+// Narrow phase
 
 #region GJK
 
