@@ -20,7 +20,6 @@ public class ColliderMesh : BaseCollider
             if (mesh == null) continue;
             meshes.Add(mesh);
 
-            // child local -> this object's local (pre-scale space)
             Matrix4x4 m = worldToLocal * filter.transform.localToWorldMatrix;
 
             List<Vector3> tmpVerts = new();

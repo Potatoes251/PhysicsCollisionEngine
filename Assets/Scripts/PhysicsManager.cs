@@ -71,7 +71,13 @@ public class PhysicsManager : MonoBehaviour
 
         dynamicTree.UpdateTree();
 
+        var sw = Stopwatch.StartNew();
         List<(int x, int y)> pairs = dynamicTree.GetPairs();
+
+        sw.Stop();
+        UnityEngine.Debug.Log($"Took {sw.Elapsed.TotalMilliseconds:F3} ms to form pairs");
+        print(pairs.Count);
+        sw = Stopwatch.StartNew();
 
         foreach ((int, int) pair in pairs)
         {
@@ -87,5 +93,7 @@ public class PhysicsManager : MonoBehaviour
                 ResolveCollision(body1, body2, info);
             }
         }
+        sw.Stop();
+        UnityEngine.Debug.Log($"Took {sw.Elapsed.TotalMilliseconds:F3} ms to resolve colllisions");
     }
 }

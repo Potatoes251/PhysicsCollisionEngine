@@ -266,7 +266,13 @@ public class DynamicTree : MonoBehaviour
 
         if (nodeL.IsLeaf() && nodeR.IsLeaf())
         {
-            pairs.Add((nodeL.colliderId, nodeR.colliderId));
+            BaseCollider cL = colliders[nodeL.colliderId];
+            BaseCollider cR = colliders[nodeR.colliderId];
+
+            // remove pairs between static objects
+            if (cL.attachedBody != null && cR.attachedBody != null &&
+                (cL.attachedBody.mass != 0 || cR.attachedBody.mass != 0))
+                pairs.Add((nodeL.colliderId, nodeR.colliderId));
         }
         else if (nodeL.IsLeaf())
         {

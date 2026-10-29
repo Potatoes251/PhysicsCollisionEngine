@@ -9,6 +9,7 @@ public class RigidBody : MonoBehaviour
     public Vector3 angularVelocity = new();
     private Vector3 torque = new();
 
+    // 0 mass == static object
     public float mass = 1f;
 
     [HideInInspector]
