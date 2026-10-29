@@ -13,7 +13,7 @@ public class DynamicTree : MonoBehaviour
     [HideInInspector]
     public List<BaseCollider> colliders;
 
-    List<(int x, int y)> pairs = new();
+    readonly List<(int x, int y)> pairs = new();
 
 #region MonoBehaviour
 
@@ -405,7 +405,7 @@ public class DynamicTree : MonoBehaviour
         BaseCollider c1 = colliders[x];
         BaseCollider c2 = colliders[y];
 
-        List<SupportPoint> polytope = simplex;
+        List<SupportPoint> polytope = new(simplex);
         List<int> faces = new (){0, 1, 2,
                                 0, 3, 1,
                                 0, 2, 3,
@@ -450,7 +450,7 @@ public class DynamicTree : MonoBehaviour
                         faces[f] = faces[^1]; 
                         faces.RemoveAt(faces.Count - 1);
 
-                        normals[j] = normals[^1]; // pop-erase
+                        normals[j] = normals[^1];
                         normals.RemoveAt(normals.Count - 1);
 
                         j--;

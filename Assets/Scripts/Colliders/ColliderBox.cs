@@ -1,10 +1,16 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ColliderBox : BaseCollider
 {
     [SerializeField] Vector3 center = Vector3.zero; // local space
     [SerializeField] Vector3 size = Vector3.one;  // local space, before scale
+
+    protected override void Awake()
+    {
+        base.Awake();
+        localBounds.center = center;
+        localBounds.extents = size * .5f;
+    }
 
     public override Vector3 Support(Vector3 dir)
     {

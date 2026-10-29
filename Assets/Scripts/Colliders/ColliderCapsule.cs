@@ -4,10 +4,10 @@ using UnityEngine;
 public class ColliderCapsule : BaseCollider
 {
     [SerializeField]
-    float radius;
+    float radius = .5f;
 
     [SerializeField]
-    float halfHeight;
+    float halfHeight = .5f;
 
     [SerializeField]
     Vector3 center;
@@ -18,6 +18,14 @@ public class ColliderCapsule : BaseCollider
     public Vector3 p1 => worldCenter + halfHeight * Vector3.up;
 
     Vector3 Axis => transform.up;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        localBounds.center = center;
+        localBounds.extents = new Vector3(radius, halfHeight + radius, radius);
+    }
 
     public override Vector3 Support(Vector3 dir)
     {

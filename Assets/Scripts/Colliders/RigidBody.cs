@@ -42,7 +42,7 @@ public class RigidBody : MonoBehaviour
     {
         if (linearDamping > 0)
         {
-            velocity *= (1 - linearDamping * Time.fixedDeltaTime);
+            velocity *= (1 - Mathf.Max(0f, linearDamping * Time.fixedDeltaTime));
         }
         if (angularDamping > 1)
         {
@@ -54,7 +54,7 @@ public class RigidBody : MonoBehaviour
         }
     }
 
-    public void ApplyForce(float dt) 
+    public void ApplyForce(float dt)
     {
         velocity += dt * invMass * force;
         force = Vector3.zero;
@@ -82,11 +82,12 @@ public class RigidBody : MonoBehaviour
     public void AddImpulse(Vector3 force, Vector3 r) // r = contact - center
     { 
         velocity += force * invMass;
-        torque += ApplyInvInertia(Vector3.Cross(r, force));
+        angularVelocity += ApplyInvInertia(Vector3.Cross(r, force));
     }
 
     public void IntegrateTransform(float dt)
     {
+        // uses semi-explicit euler method
         transform.position += velocity * dt;
 
         float angle = angularVelocity.magnitude * dt;

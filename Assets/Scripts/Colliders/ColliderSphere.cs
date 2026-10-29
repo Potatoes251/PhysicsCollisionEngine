@@ -11,6 +11,14 @@ public class ColliderSphere : BaseCollider
 
     Vector3 center => math.transform(transform.localToWorldMatrix, centerLocal);
 
+    protected override void Awake()
+    {
+        base.Awake();
+
+        localBounds.center = centerLocal;
+        localBounds.extents = Vector3.one * radius;
+    }
+
     public override Vector3 Support(Vector3 dir)
     {
         return center + radius * dir.normalized;

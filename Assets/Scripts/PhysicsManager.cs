@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using static DynamicTree;
-using static UnityEngine.PlayerLoop.PreUpdate;
 
 public class PhysicsManager : MonoBehaviour
 {
@@ -11,10 +12,13 @@ public class PhysicsManager : MonoBehaviour
     [SerializeField]
     private Vector3 gravity = new(0f, -9.81f, 0f);
 
+    [Header("Debug")]
     [SerializeField]
     private bool enableGravity = true;
     [SerializeField]
     private bool enableDamping = true;
+    [SerializeField]
+    private float timeMult = 1f;
 
     private void ResolveCollision(RigidBody body1, RigidBody body2, HitInfo hitInfo)
     {
@@ -28,19 +32,20 @@ public class PhysicsManager : MonoBehaviour
         {
             Vector3 r1xn = Vector3.Cross(hitInfo.hitPoint - body1.transform.position, hitInfo.normal);
             Vector3 r2xn = Vector3.Cross(hitInfo.hitPoint - body2.transform.position, hitInfo.normal);
-            float k = sumInvMass
+            float denom = sumInvMass
                     + Vector3.Dot(r1xn, body1.ApplyInvInertia(r1xn))
                     + Vector3.Dot(r2xn, body2.ApplyInvInertia(r2xn));
-            if (k == 0f) return;
+            if (denom == 0f) return;
             
-            float bounciness = (body1.bounciness + body2.bounciness) * .5f;
+            float bounciness = (body1.bounciness + body2.bounciness) * .5f; // average of both bodies
                 
-            float impulse = -(1 + bounciness) * dot / k;
+            float impulse = -(1 + bounciness) * dot / denom;
 
             body1.AddImpulse(-impulse * hitInfo.normal, hitInfo.hitPoint - body1.transform.position);
             body2.AddImpulse(impulse * hitInfo.normal, hitInfo.hitPoint - body2.transform.position);
         }
 
+        // apply correction
         float correction = Mathf.Max(hitInfo.depth, 0f) / sumInvMass;
         body1.transform.position -= correction * body1.invMass * hitInfo.normal;
         body2.transform.position += correction * body2.invMass * hitInfo.normal;
@@ -48,7 +53,7 @@ public class PhysicsManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        float dt = Time.fixedDeltaTime;
+        float dt = Time.fixedDeltaTime * timeMult;
         foreach (BaseCollider collider in dynamicTree.colliders)
         {
             RigidBody b = collider.attachedBody;
