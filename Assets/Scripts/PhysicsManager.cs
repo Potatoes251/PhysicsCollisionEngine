@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.VisualScripting;
 using UnityEngine;
 using static DynamicTree;
 
@@ -19,6 +19,16 @@ public class PhysicsManager : MonoBehaviour
     private bool enableDamping = true;
     [SerializeField]
     private float timeMult = 1f;
+
+    private readonly Benchmark broad = new("Broad");
+    private readonly Benchmark pairCount = new("pairCount");
+    private readonly Benchmark narrow = new("Narrow");
+    private readonly Benchmark fps = new("FPS");
+
+    private void Start()
+    {
+        fps.countToPrint = 3000;
+    }
 
     private void ResolveCollision(RigidBody body1, RigidBody body2, HitInfo hitInfo)
     {
@@ -51,6 +61,11 @@ public class PhysicsManager : MonoBehaviour
         body2.transform.position += correction * body2.invMass * hitInfo.normal;
     }
 
+    private void Update()
+    {
+        fps.Add(1f / Time.deltaTime);
+    }
+
     private void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime * timeMult;
@@ -69,15 +84,15 @@ public class PhysicsManager : MonoBehaviour
             b.IntegrateTransform(dt);
         }
 
+        var sw = Stopwatch.StartNew();
         dynamicTree.UpdateTree();
 
-        var sw = Stopwatch.StartNew();
         List<(int x, int y)> pairs = dynamicTree.GetPairs();
 
         sw.Stop();
-        UnityEngine.Debug.Log($"Took {sw.Elapsed.TotalMilliseconds:F3} ms to form pairs");
-        print(pairs.Count);
-        sw = Stopwatch.StartNew();
+        broad.Add(sw.Elapsed.TotalMilliseconds);
+        pairCount.Add(pairs.Count);
+        sw.Restart();
 
         foreach ((int, int) pair in pairs)
         {
@@ -94,6 +109,6 @@ public class PhysicsManager : MonoBehaviour
             }
         }
         sw.Stop();
-        UnityEngine.Debug.Log($"Took {sw.Elapsed.TotalMilliseconds:F3} ms to resolve colllisions");
+        narrow.Add(sw.Elapsed.TotalMilliseconds);
     }
 }

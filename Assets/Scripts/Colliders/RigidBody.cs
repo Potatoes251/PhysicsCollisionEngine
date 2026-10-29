@@ -88,7 +88,7 @@ public class RigidBody : MonoBehaviour
 
     public void IntegrateTransform(float dt)
     {
-        // uses semi-explicit euler method
+        // uses semi-implicit euler method
         transform.position += velocity * dt;
 
         float angle = angularVelocity.magnitude * dt;
