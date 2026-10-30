@@ -12,6 +12,17 @@ public class ColliderBox : BaseCollider
         localBounds.extents = size * .5f;
     }
 
+    protected override void SetInertia()
+    {
+        Vector3 worldSize = Vector3.Scale(transform.lossyScale, size);
+
+        float x2 = worldSize.x * worldSize.x;
+        float y2 = worldSize.y * worldSize.y;
+        float z2 = worldSize.z * worldSize.z;
+        float k = attachedBody.mass / 12f;
+        attachedBody.SetLocalInertia(new Vector3(1f / (k * (y2 + z2)), 1f / (k * (x2 + z2)), 1f / (k * (x2 + y2))));
+    }
+
     public override Vector3 Support(Vector3 dir)
     {
         Vector3 localDir = transform.InverseTransformDirection(dir);

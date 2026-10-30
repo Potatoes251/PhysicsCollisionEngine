@@ -19,6 +19,11 @@ public class ColliderSphere : BaseCollider
         localBounds.extents = Vector3.one * radius;
     }
 
+    protected override void SetInertia()
+    {
+        attachedBody.SetLocalInertia(Vector3.one * (.4f * attachedBody.mass * radius * radius));
+    }
+
     public override Vector3 Support(Vector3 dir)
     {
         return center + radius * dir.normalized;

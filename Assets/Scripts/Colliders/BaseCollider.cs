@@ -40,9 +40,13 @@ public abstract class BaseCollider : MonoBehaviour
         {
             attachedBody = body;
         }
+
+        SetInertia();
     }
 
     public abstract Vector3 Support(Vector3 dir);
+
+    protected abstract void SetInertia();
 
     protected static Vector3 InverseScale(Vector3 s) =>
         new(s.x != 0 ? 1f / s.x : 0, s.y != 0 ? 1f / s.y : 0, s.z != 0 ? 1f / s.z : 0);

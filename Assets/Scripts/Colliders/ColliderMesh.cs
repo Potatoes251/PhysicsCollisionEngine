@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ColliderMesh : BaseCollider
 {
@@ -61,6 +62,53 @@ public class ColliderMesh : BaseCollider
             center = transform.InverseTransformPoint(combined.center),
             extents = Vector3.Scale(combined.extents, InverseScale(transform.lossyScale))
         };
+    }
+
+    protected override void SetInertia()
+    {
+        Vector3 s = transform.lossyScale;
+        float m = attachedBody.mass;
+
+        float volume = 0f;
+        // Second moments (integral of p * p^T) about the body origin, unit density
+        float xx = 0f, yy = 0f, zz = 0f;
+
+        foreach (Mesh mesh in meshes)
+        {
+            Vector3[] verts = mesh.vertices;
+            int[] tris = mesh.triangles;
+
+            for (int i = 0; i < tris.Length; i += 3)
+            {
+                Vector3 a = Vector3.Scale(verts[tris[i]], s);
+                Vector3 b = Vector3.Scale(verts[tris[i + 1]], s);
+                Vector3 c = Vector3.Scale(verts[tris[i + 2]], s);
+
+                // Signed volume of the tetrahedron (origin, a, b, c)
+                float v = Vector3.Dot(a, Vector3.Cross(b, c)) / 6f;
+                volume += v;
+
+                Vector3 sum = a + b + c;
+                float w = v / 20f;
+                xx += w * (a.x * a.x + b.x * b.x + c.x * c.x + sum.x * sum.x);
+                yy += w * (a.y * a.y + b.y * b.y + c.y * c.y + sum.y * sum.y);
+                zz += w * (a.z * a.z + b.z * b.z + c.z * c.z + sum.z * sum.z);
+            }
+        }
+
+        Vector3 inertia = Vector3.zero;
+
+        if (Mathf.Abs(volume) > 1e-9f)
+        {
+            float density = m / volume;   // sign cancels with negative scale / flipped winding
+                                          // Inertia about the body origin (the point your body rotates about)
+            inertia = new Vector3(
+                density * (yy + zz),
+                density * (xx + zz),
+                density * (xx + yy));
+        }
+
+        attachedBody.SetLocalInertia(new(1f / inertia.x, 1f / inertia.y, 1f / inertia.z));
     }
 
     public override Vector3 Support(Vector3 dir)

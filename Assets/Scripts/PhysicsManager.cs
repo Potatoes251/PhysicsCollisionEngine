@@ -100,6 +100,8 @@ public class PhysicsManager : MonoBehaviour
             {
                 HitInfo info = dynamicTree.EPA(pair);
 
+                if (info.depth == float.MaxValue) continue;
+
                 (int x, int y) = pair;
 
                 RigidBody body1 = dynamicTree.colliders[x].attachedBody;

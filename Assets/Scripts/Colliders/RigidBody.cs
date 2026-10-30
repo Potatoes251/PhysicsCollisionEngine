@@ -22,21 +22,25 @@ public class RigidBody : MonoBehaviour
     [SerializeField]
     private float angularDamping = .05f;
 
-    public Vector3 localInertia = Vector3.one;
     private Vector3 invLocalInertia;
 
     private void Awake()
     {
+        invMass = mass == 0f ? 0f : 1f / mass;
+    }
+
+    public void SetLocalInertia(Vector3 localInertia)
+    {
         if (mass == 0f)
         {
-            invMass = 0f;
             invLocalInertia = Vector3.zero;
+            return;
         }
-        else
-        {
-            invMass = 1f / mass;
-            invLocalInertia = new Vector3(1f / localInertia.x, 1f / localInertia.y, 1f / localInertia.z);
-        }
+
+        invLocalInertia = new Vector3(
+            localInertia.x == 0 ? 1f : 1f/ localInertia.x,
+            localInertia.y == 0 ? 1f : 1f/ localInertia.y,
+            localInertia.z == 0 ? 1f : 1f/ localInertia.z);
     }
 
     public void ApplyDamping()
