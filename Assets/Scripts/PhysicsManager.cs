@@ -20,9 +20,12 @@ public class PhysicsManager : MonoBehaviour
     [SerializeField]
     private float timeMult = 1f;
 
+    private List<HitInfo> hitResults = new List<HitInfo>();
+
     private readonly Benchmark broad = new("Broad");
     private readonly Benchmark pairCount = new("pairCount");
     private readonly Benchmark narrow = new("Narrow");
+    private readonly Benchmark response = new("Response");
     private readonly Benchmark fps = new("FPS");
 
     private void Start()
@@ -94,23 +97,31 @@ public class PhysicsManager : MonoBehaviour
         pairCount.Add(pairs.Count);
         sw.Restart();
 
+        hitResults.Clear();
+
         foreach ((int, int) pair in pairs)
         {
             if (dynamicTree.GJK(pair))
             {
                 HitInfo info = dynamicTree.EPA(pair);
 
-                if (info.depth == float.MaxValue) continue;
-
-                (int x, int y) = pair;
-
-                RigidBody body1 = dynamicTree.colliders[x].attachedBody;
-                RigidBody body2 = dynamicTree.colliders[y].attachedBody;
-
-                ResolveCollision(body1, body2, info);
+                if (info.depth != float.MaxValue)
+                    hitResults.Add(info);
             }
         }
         sw.Stop();
         narrow.Add(sw.Elapsed.TotalMilliseconds);
+        sw.Restart();
+
+        foreach (HitInfo hit in hitResults)
+        {
+            RigidBody body1 = dynamicTree.colliders[hit.colliderA].attachedBody;
+            RigidBody body2 = dynamicTree.colliders[hit.colliderB].attachedBody;
+
+            ResolveCollision(body1, body2, hit);
+        }
+
+        sw.Stop();
+        response.Add(sw.Elapsed.TotalMilliseconds);
     }
 }

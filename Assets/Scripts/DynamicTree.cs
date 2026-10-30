@@ -312,6 +312,8 @@ public class DynamicTree : MonoBehaviour
         public Vector3 normal;
         public Vector3 hitPoint;
         public float depth;
+        public int colliderA;
+        public int colliderB;
     }
 
     public struct SupportPoint
@@ -518,7 +520,12 @@ public class DynamicTree : MonoBehaviour
         Vector3 contactA = bary.x * A.a + bary.y * B.a + bary.z * C.a;
         Vector3 contactB = bary.x * A.b + bary.y * B.b + bary.z * C.b;
 
-        return new() { normal = minNormal, depth = minDist, hitPoint = (contactA + contactB) * .5f };
+        return new() { 
+            normal = minNormal, 
+            depth = minDist, 
+            hitPoint = (contactA + contactB) * .5f, 
+            colliderA = x, 
+            colliderB = y };
     }
 
     static Vector3 Barycentric(Vector3 p, Vector3 a, Vector3 b, Vector3 c)

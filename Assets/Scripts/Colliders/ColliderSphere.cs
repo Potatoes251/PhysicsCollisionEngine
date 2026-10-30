@@ -4,7 +4,7 @@ using UnityEngine;
 public class ColliderSphere : BaseCollider
 {
     [SerializeField]
-    float radius = 1f;
+    float radius = .5f;
 
     [SerializeField]
     Vector3 centerLocal;
