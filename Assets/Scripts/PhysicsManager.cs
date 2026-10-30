@@ -1,14 +1,9 @@
 using System.Collections.Generic;
-using System.Diagnostics;
-using Unity.VisualScripting;
 using UnityEngine;
 using static DynamicTree;
 
 public class PhysicsManager : MonoBehaviour
 {
-    [SerializeField]
-    DynamicTree dynamicTree;
-
     [SerializeField]
     private Vector3 gravity = new(0f, -9.81f, 0f);
 
@@ -20,18 +15,8 @@ public class PhysicsManager : MonoBehaviour
     [SerializeField]
     private float timeMult = 1f;
 
-    private List<HitInfo> hitResults = new List<HitInfo>();
-
-    private readonly Benchmark broad = new("Broad");
-    private readonly Benchmark pairCount = new("pairCount");
-    private readonly Benchmark narrow = new("Narrow");
-    private readonly Benchmark response = new("Response");
-    private readonly Benchmark fps = new("FPS");
-
-    private void Start()
-    {
-        fps.countToPrint = 3000;
-    }
+    private readonly List<HitInfo> hitResults = new();
+    private List<(int x, int y)> pairs = new();
 
     private void ResolveCollision(RigidBody body1, RigidBody body2, HitInfo hitInfo)
     {
@@ -39,7 +24,7 @@ public class PhysicsManager : MonoBehaviour
 
         if (sumInvMass == 0f) return;
 
-        float dot = Vector3.Dot((body2.velocity - body1.velocity), hitInfo.normal);
+        float dot = Vector3.Dot(body2.velocity - body1.velocity, hitInfo.normal);
 
         if (dot < 0f)
         {
@@ -64,15 +49,10 @@ public class PhysicsManager : MonoBehaviour
         body2.transform.position += correction * body2.invMass * hitInfo.normal;
     }
 
-    private void Update()
-    {
-        fps.Add(1f / Time.deltaTime);
-    }
-
     private void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime * timeMult;
-        foreach (BaseCollider collider in dynamicTree.colliders)
+        foreach (BaseCollider collider in DynamicTree.instance.colliders)
         {
             RigidBody b = collider.attachedBody;
 
@@ -87,41 +67,29 @@ public class PhysicsManager : MonoBehaviour
             b.IntegrateTransform(dt);
         }
 
-        var sw = Stopwatch.StartNew();
-        dynamicTree.UpdateTree();
+        DynamicTree.instance.UpdateTree();
 
-        List<(int x, int y)> pairs = dynamicTree.GetPairs();
-
-        sw.Stop();
-        broad.Add(sw.Elapsed.TotalMilliseconds);
-        pairCount.Add(pairs.Count);
-        sw.Restart();
+        DynamicTree.instance.GetPairs(ref pairs);
 
         hitResults.Clear();
 
         foreach ((int, int) pair in pairs)
         {
-            if (dynamicTree.GJK(pair))
+            if (DynamicTree.instance.GJK(pair))
             {
-                HitInfo info = dynamicTree.EPA(pair);
+                HitInfo info = DynamicTree.instance.EPA(pair);
 
                 if (info.depth != float.MaxValue)
                     hitResults.Add(info);
             }
         }
-        sw.Stop();
-        narrow.Add(sw.Elapsed.TotalMilliseconds);
-        sw.Restart();
 
         foreach (HitInfo hit in hitResults)
         {
-            RigidBody body1 = dynamicTree.colliders[hit.colliderA].attachedBody;
-            RigidBody body2 = dynamicTree.colliders[hit.colliderB].attachedBody;
+            RigidBody body1 = DynamicTree.instance.colliders[hit.colliderA].attachedBody;
+            RigidBody body2 = DynamicTree.instance.colliders[hit.colliderB].attachedBody;
 
             ResolveCollision(body1, body2, hit);
         }
-
-        sw.Stop();
-        response.Add(sw.Elapsed.TotalMilliseconds);
     }
 }

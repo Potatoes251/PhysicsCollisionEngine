@@ -3,11 +3,11 @@ using System.Diagnostics;
 
 public class Benchmark
 {
-    private string name;
+    private readonly string name;
     private double total;
     private double min = double.MaxValue;
     private double max;
-    private int count;
+    public int count;
     public int countToPrint = 500;
 
     private double average => total / count;

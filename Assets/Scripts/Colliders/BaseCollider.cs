@@ -44,6 +44,16 @@ public abstract class BaseCollider : MonoBehaviour
         SetInertia();
     }
 
+    private void Start()
+    {
+        DynamicTree.instance.RegisterCollider(this);
+    }
+
+    private void OnDestroy()
+    {
+        DynamicTree.instance.RemoveCollider(this);
+    }
+
     public abstract Vector3 Support(Vector3 dir);
 
     protected abstract void SetInertia();

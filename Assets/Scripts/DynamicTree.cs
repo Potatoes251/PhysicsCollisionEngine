@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
-using static DynamicTree;
 
 public class DynamicTree : MonoBehaviour
 {
@@ -16,50 +16,51 @@ public class DynamicTree : MonoBehaviour
 
     readonly List<(int x, int y)> pairs = new();
 
-    private readonly Benchmark insertion = new("Insertion");
+    public static DynamicTree instance;
 
 #region MonoBehaviour
 
-    // Collect all colliders and store them in the tree
-    void Start()
+    void Awake()
     {
-        colliders = new(FindObjectsByType<BaseCollider>(FindObjectsSortMode.None));
-
-        for (int i = 0; i < colliders.Count; i++)
+        if (instance != null)
+            Destroy(this);
+        else
         {
-            int leafIdx = InsertNode(colliders[i], i);
-            leafOf.Add(leafIdx);
+            instance = this;
+            DontDestroyOnLoad(this);
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        if (!EditorApplication.isPlaying || !debug) return;
+    //private void OnDrawGizmos()
+    //{
+    //    if (!EditorApplication.isPlaying || !debug) return;
 
-        foreach (Node node in nodes)
-        {
-            Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
-        }
+    //    foreach (Node node in nodes)
+    //    {
+    //        Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
+    //    }
 
-        GetPairs();
+    //    List<(int, int)> pairs = new();
 
-        foreach ((int, int) pair in pairs)
-        {
-            if (GJK(pair))
-            {
-                Gizmos.color = Color.red;
-                HitInfo info = EPA(pair);
-                Gizmos.DrawSphere(info.hitPoint, .1f);
-                Gizmos.DrawLine(info.hitPoint, info.hitPoint + info.normal * info.depth);
-            }
-            else
-            {
-                Gizmos.color = Color.green;
-                (int x, int y) = pair;
-                Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
-            }
-        }
-    }
+    //    GetPairs(ref pairs);
+
+    //    foreach ((int, int) pair in pairs)
+    //    {
+    //        if (GJK(pair))
+    //        {
+    //            Gizmos.color = Color.red;
+    //            HitInfo info = EPA(pair);
+    //            Gizmos.DrawSphere(info.hitPoint, .1f);
+    //            Gizmos.DrawLine(info.hitPoint, info.hitPoint + info.normal * info.depth);
+    //        }
+    //        else
+    //        {
+    //            Gizmos.color = Color.green;
+    //            (int x, int y) = pair;
+    //            Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
+    //        }
+    //    }
+    //}
 
     #endregion
 
@@ -78,8 +79,6 @@ public class DynamicTree : MonoBehaviour
     }
 
 #endregion
-
-// Broad phase
 
 #region Node
     struct Node
@@ -109,7 +108,6 @@ public class DynamicTree : MonoBehaviour
 
     public void UpdateTree()
     {
-        int reinsertion = 0;
         for (int i = 0; i < colliders.Count; i++)
         {
             int leaf = leafOf[i];
@@ -122,10 +120,33 @@ public class DynamicTree : MonoBehaviour
             {
                 RemoveLeaf(leaf);
                 leafOf[i] = InsertNode(colliders[i], i);
-                reinsertion++;
             }
         }
-        insertion.Add(reinsertion);
+    }
+
+    public void RegisterCollider(BaseCollider collider)
+    {
+        int idx = colliders.Count;
+        colliders.Add(collider);
+
+        int leafIdx = InsertNode(collider, idx);
+        leafOf.Add(leafIdx);
+    }
+
+    public void RemoveCollider(BaseCollider collider)
+    {
+        int idx;
+        for (idx = 0; idx < colliders.Count;idx++)
+        {
+            if (collider != colliders[idx]) continue;
+
+            int leaf = leafOf[idx];
+
+            RemoveLeaf(leaf);
+        }
+
+        if (idx < colliders.Count)
+            colliders.RemoveAtSwapBack(idx);
     }
 
     int Allocate(Node n)
@@ -240,13 +261,17 @@ public class DynamicTree : MonoBehaviour
         }
     }
 
-    public List<(int x, int y)> GetPairs()
+    #endregion
+
+#region BroadPhase
+
+    public void GetPairs(ref List<(int x, int y)> pairs)
     {
-        pairs.Clear();
+        this.pairs.Clear();
 
         PairsHelper(root);
 
-        return pairs;
+        pairs = this.pairs;
     }
 
     private void PairsHelper(int n)
@@ -299,7 +324,7 @@ public class DynamicTree : MonoBehaviour
         }
     }
 
-#endregion
+    #endregion
 
 // Narrow phase
 
