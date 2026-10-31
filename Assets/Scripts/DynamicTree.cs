@@ -31,40 +31,40 @@ public class DynamicTree : MonoBehaviour
         }
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    if (!EditorApplication.isPlaying || !debug) return;
+    private void OnDrawGizmos()
+    {
+        if (!EditorApplication.isPlaying || !debug) return;
 
-    //    foreach (Node node in nodes)
-    //    {
-    //        Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
-    //    }
+        foreach (Node node in nodes)
+        {
+            Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
+        }
 
-    //    List<(int, int)> pairs = new();
+        List<(int, int)> pairs = new();
 
-    //    GetPairs(ref pairs);
+        GetPairs(ref pairs);
 
-    //    foreach ((int, int) pair in pairs)
-    //    {
-    //        if (GJK(pair))
-    //        {
-    //            Gizmos.color = Color.red;
-    //            HitInfo info = EPA(pair);
-    //            Gizmos.DrawSphere(info.hitPoint, .1f);
-    //            Gizmos.DrawLine(info.hitPoint, info.hitPoint + info.normal * info.depth);
-    //        }
-    //        else
-    //        {
-    //            Gizmos.color = Color.green;
-    //            (int x, int y) = pair;
-    //            Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
-    //        }
-    //    }
-    //}
+        foreach ((int, int) pair in pairs)
+        {
+            if (GJK(pair))
+            {
+                Gizmos.color = Color.red;
+                HitInfo info = EPA(pair);
+                Gizmos.DrawSphere(info.hitPoint, .1f);
+                Gizmos.DrawLine(info.hitPoint, info.hitPoint + info.normal * info.depth);
+            }
+            else
+            {
+                Gizmos.color = Color.green;
+                (int x, int y) = pair;
+                Gizmos.DrawLine(colliders[x].bounds.center, colliders[y].bounds.center);
+            }
+        }
+    }
 
     #endregion
 
-#region Bounds
+    #region Bounds
 
     AABB AddBounds(AABB bound1, AABB bound2)
     {

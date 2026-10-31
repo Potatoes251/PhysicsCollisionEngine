@@ -69,31 +69,31 @@ public class ColliderCapsule : BaseCollider
         return tip + radius * n;
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    if (!debug) return;
+    private void OnDrawGizmos()
+    {
+        if (!debug) return;
 
-    //    Handles.matrix = transform.localToWorldMatrix;
+        Handles.matrix = transform.localToWorldMatrix;
 
-    //    Vector3 top = Vector3.up * halfHeight;
-    //    Vector3 bot = Vector3.down * halfHeight;
+        Vector3 top = Vector3.up * halfHeight;
+        Vector3 bot = Vector3.down * halfHeight;
 
-    //    // Rings where the caps meet the cylinder
-    //    Handles.DrawWireDisc(top, Vector3.up, radius);
-    //    Handles.DrawWireDisc(bot, Vector3.up, radius);
+        // Rings where the caps meet the cylinder
+        Handles.DrawWireDisc(top, Vector3.up, radius);
+        Handles.DrawWireDisc(bot, Vector3.up, radius);
 
-    //    // Top hemisphere arcs
-    //    Handles.DrawWireArc(top, Vector3.forward, Vector3.right, 180f, radius);
-    //    Handles.DrawWireArc(top, Vector3.right, Vector3.back, 180f, radius);
+        // Top hemisphere arcs
+        Handles.DrawWireArc(top, Vector3.forward, Vector3.right, 180f, radius);
+        Handles.DrawWireArc(top, Vector3.right, Vector3.back, 180f, radius);
 
-    //    // Bottom hemisphere arcs
-    //    Handles.DrawWireArc(bot, Vector3.forward, Vector3.left, 180f, radius);
-    //    Handles.DrawWireArc(bot, Vector3.right, Vector3.forward, 180f, radius);
+        // Bottom hemisphere arcs
+        Handles.DrawWireArc(bot, Vector3.forward, Vector3.left, 180f, radius);
+        Handles.DrawWireArc(bot, Vector3.right, Vector3.forward, 180f, radius);
 
-    //    // Side lines
-    //    Handles.DrawLine(top + Vector3.right * radius, bot + Vector3.right * radius);
-    //    Handles.DrawLine(top + Vector3.left * radius, bot + Vector3.left * radius);
-    //    Handles.DrawLine(top + Vector3.forward * radius, bot + Vector3.forward * radius);
-    //    Handles.DrawLine(top + Vector3.back * radius, bot + Vector3.back * radius);
-    //}
+        // Side lines
+        Handles.DrawLine(top + Vector3.right * radius, bot + Vector3.right * radius);
+        Handles.DrawLine(top + Vector3.left * radius, bot + Vector3.left * radius);
+        Handles.DrawLine(top + Vector3.forward * radius, bot + Vector3.forward * radius);
+        Handles.DrawLine(top + Vector3.back * radius, bot + Vector3.back * radius);
+    }
 }
