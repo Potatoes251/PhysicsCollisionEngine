@@ -135,18 +135,15 @@ public class DynamicTree : MonoBehaviour
 
     public void RemoveCollider(BaseCollider collider)
     {
-        int idx;
-        for (idx = 0; idx < colliders.Count;idx++)
-        {
-            if (collider != colliders[idx]) continue;
+        int idx = colliders.IndexOf(collider);
+        if (idx < 0) return;
 
-            int leaf = leafOf[idx];
+        RemoveLeaf(leafOf[idx]);
 
-            RemoveLeaf(leaf);
-        }
+        if (idx != colliders.Count - 1)
+            leafOf[idx] = leafOf[colliders.Count - 1];
 
-        if (idx < colliders.Count)
-            colliders.RemoveAtSwapBack(idx);
+        colliders.RemoveAtSwapBack(idx);
     }
 
     int Allocate(Node n)

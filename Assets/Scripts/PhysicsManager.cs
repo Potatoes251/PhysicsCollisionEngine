@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using static DynamicTree;
 
@@ -17,6 +18,17 @@ public class PhysicsManager : MonoBehaviour
 
     private readonly List<HitInfo> hitResults = new();
     private List<(int x, int y)> pairs = new();
+
+    private readonly Benchmark updateTree = new("updateTree");
+    private readonly Benchmark broad = new("Broad");
+    private readonly Benchmark pairCount = new("pairCount");
+    private readonly Benchmark narrow = new("Narrow");
+    private readonly Benchmark fps = new("FPS");
+
+    private void Start()
+    {
+        fps.countToPrint = 3000;
+    }
 
     private void ResolveCollision(RigidBody body1, RigidBody body2, HitInfo hitInfo)
     {
@@ -49,6 +61,11 @@ public class PhysicsManager : MonoBehaviour
         body2.transform.position += correction * body2.invMass * hitInfo.normal;
     }
 
+    private void Update()
+    {
+        fps.Add(1f / Time.deltaTime);
+    }
+
     private void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime * timeMult;
@@ -67,9 +84,20 @@ public class PhysicsManager : MonoBehaviour
             b.IntegrateTransform(dt);
         }
 
+        var sw = Stopwatch.StartNew();
+        
         DynamicTree.instance.UpdateTree();
 
+        sw.Stop();
+        updateTree.Add(sw.Elapsed.TotalMilliseconds);
+        sw.Restart();
+
         DynamicTree.instance.GetPairs(ref pairs);
+
+        sw.Stop();
+        broad.Add(sw.Elapsed.TotalMilliseconds);
+        pairCount.Add(pairs.Count);
+        sw.Restart();
 
         hitResults.Clear();
 
@@ -91,5 +119,7 @@ public class PhysicsManager : MonoBehaviour
 
             ResolveCollision(body1, body2, hit);
         }
+        sw.Stop();
+        narrow.Add(sw.Elapsed.TotalMilliseconds);
     }
 }
