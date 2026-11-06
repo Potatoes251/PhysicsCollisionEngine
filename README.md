@@ -19,7 +19,7 @@ The engine is showcased in a **Plinko-style demo scene**: balls fall through row
 while the player can drop extra capsules or spheres at runtime. The scene exercises the whole engine: the broad phase filters ball/peg and ball/ball pairs, 
 GJK and EPA provide contact information, and the response handles bounces and rotation.
 
-![Demo scene](Doc/mainBoard.png)
+![Demo scene](Doc/3boards.png)
 
 The pipeline that runs on every `FixedUpdate`:
 
