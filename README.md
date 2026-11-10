@@ -86,7 +86,7 @@ Broad phase       ->  Narrow phase  ->  EPA               ->  Response          
 
 ```bash
 # Clone the repository
-git clone (https://github.com/Potatoes251/PhysicsCollisionEngine)
+git clone https://github.com/Potatoes251/PhysicsCollisionEngine
 cd PhysicsCollisionEngine
 ```
 
