@@ -86,8 +86,8 @@ Broad phase       ->  Narrow phase  ->  EPA               ->  Response          
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd <project-folder>
+git clone (https://github.com/Potatoes251/PhysicsCollisionEngine)
+cd PhysicsCollisionEngine
 ```
 
 1. Open the project folder in Unity Hub.
